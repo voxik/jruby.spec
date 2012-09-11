@@ -1,0 +1,11 @@
+--- src/org/jruby/runtime/load/LoadService.java.orig	2012-08-07 09:24:18.000000000 +0200
++++ src/org/jruby/runtime/load/LoadService.java	2012-09-10 15:16:33.250730754 +0200
+@@ -261,6 +261,8 @@
+                     // MRI standard lib
+                     addPath(rubyDir + Constants.RUBY_MAJOR_VERSION);
+                 }
++
++		addPath(SYSTEM_RUBYGEMS_PATH);
+             }
+ 
+         } catch(SecurityException ignore) {}
