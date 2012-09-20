@@ -27,8 +27,6 @@ Patch3:         jruby-no-jar-bundling.patch
 # UDP multicast test hangs
 # http://jira.codehaus.org/browse/JRUBY-6758
 Patch4:         jruby-comment-out-hanging-socket-test.patch
-# use sed to replace the stub with actual loadpath
-Patch5:         jruby-add-system-rubygems-loadpath-stub.patch
 
 # this patch contains the following upstream change
 # https://github.com/jruby/jruby/commit/6c1d41aedfde705c969abf10cf5384e2be69f10a
@@ -145,8 +143,6 @@ The bindings for the yecht library for internal use in jruby
 %patch2 -p0
 %patch3 -p0
 %patch4 -p0
-# %%patch5 -p0
-# sed -i 's|SYSTEM_RUBYGEMS_PATH|"%%{rubygems_path}"|' src/org/jruby/runtime/load/LoadService.java
 %patch6 -p0
 
 tar xzvf %{SOURCE1}
