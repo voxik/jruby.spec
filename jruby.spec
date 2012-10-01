@@ -6,8 +6,8 @@
 %global yecht_dlversion 0.0.2-0-g%{yecht_commitversion}
 %global yecht_cluster olabini
 
-%global preminorver preview2
-%global release 1 
+%global preminorver RC1
+%global release 1
 
 Name:           jruby
 Version:        1.7.0
@@ -17,9 +17,7 @@ Group:          Development/Languages
 License:        (CPL or GPLv2+ or LGPLv2+) and ASL 1.1 and MIT and Ruby
 URL:            http://jruby.org/
 BuildArch:      noarch
-# Seems not to contain antlib/.*
-#Source0:        http://jruby.org.s3.amazonaws.com/downloads/%%{version}/jruby-src-%%{version}%%{?preminorver:.%%{preminorver}}.tar.gz
-Source0:        https://github.com/%{name}/%{name}/tarball/%{version}.%{preminorver}/%{name}-%{name}-%{version}.%{preminorver}-0-g%{git_hash}.tar.gz
+Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0.RC1/jruby-src-1.7.0.RC1.tar.gz
 Source1:        http://github.com/%{yecht_cluster}/yecht/tarball/0.0.2/%{yecht_cluster}-yecht-%{yecht_dlversion}.tar.gz
 Patch1:         jruby-add-classpath-to-start-script.patch
 Patch2:         jruby-dont-include-jar-dependencies-in-build-xml.patch
@@ -34,6 +32,9 @@ Patch4:         jruby-comment-out-hanging-socket-test.patch
 Patch6:         jruby-remove-builtin-yecht-jar.patch
 
 Patch7:         jruby-yecht-only-build-bindings.patch
+
+# already upstream, should be part of 1.7.0 final
+Patch8:         jruby-update-to-snakeyaml-1.11.patch
 
 BuildRequires:  ant >= 1.6
 BuildRequires:  ant-junit
@@ -136,14 +137,14 @@ Requires:       %{name} = %{version}-%{release}
 The bindings for the yecht library for internal use in jruby
 
 %prep
-#%%setup -q -n %%{name}-%%{version}%%{?preminorver:.%%{preminorver}}
-%setup -q -n %{name}-%{name}-%{git_hash}
+%setup -q -n %{name}-%{version}%{?preminorver:.%{preminorver}}
 
 %patch1 -p0
 %patch2 -p0
 %patch3 -p0
 %patch4 -p0
 %patch6 -p0
+%patch8 -p1
 
 tar xzvf %{SOURCE1}
 mv %{yecht_cluster}-yecht-%{yecht_commitversion} yecht
@@ -300,6 +301,9 @@ ant test
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Mon Oct 01 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.1.RC1
+- Updated to JRuby 1.7.0.RC2.
+
 * Tue Sep 11 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.1.preview2
 - Updated to JRuby 1.7.0.preview2.
 

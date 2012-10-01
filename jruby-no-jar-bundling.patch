@@ -1,5 +1,5 @@
---- build.xml.orig	2012-09-06 14:41:06.000000000 +0200
-+++ build.xml	2012-09-06 14:52:57.317198234 +0200
+--- build.xml.orig	2012-10-01 11:51:04.264247083 +0200
++++ build.xml	2012-10-01 11:57:54.043911113 +0200
 @@ -349,13 +349,6 @@
              <fileset dir="${jruby.classes.dir}"/>
              <zipgroupfileset dir="${build.lib.dir}" includes="${jruby.jar.zip.includes}"/>
@@ -22,17 +22,23 @@
          </jar>
      </target>
  
-@@ -383,9 +375,6 @@
+@@ -383,15 +375,6 @@
                   classpath="${build.lib.dir}/jarjar-1.0.jar"/>
          <jarjar destfile="${lib.dir}/jruby-core.jar" compress="true" index="true">
              <fileset dir="${jruby.classes.dir}"/>
 -            <zipfileset src="${build.lib.dir}/${asm.jar}"/>
 -            <zipfileset src="${build.lib.dir}/${asm.util.jar}"/>
+-            <zipfileset src="${build.lib.dir}/${asm.tree.jar}"/>
+-            <zipfileset src="${build.lib.dir}/${asm.commons.jar}"/>
+-            <zipfileset src="${build.lib.dir}/${asm.analysis.jar}"/>
 -            <zipfileset src="${build.lib.dir}/yecht.jar"/>
+-            <zipfileset src="${build.lib.dir}/nailgun-0.7.1.jar"/>
+-            <zipfileset src="${build.lib.dir}/invokebinder.jar"/>
+-            <zipfileset src="${build.lib.dir}/yydebug.jar"/>
              <metainf dir="spi">
                  <include name="services/**"/>
              </metainf>
-@@ -412,13 +401,6 @@
+@@ -418,13 +401,6 @@
              <fileset dir="${jruby.classes.dir}"/>
              <zipgroupfileset dir="${build.lib.dir}" includes="${jruby.jar.zip.includes}"/>
  
@@ -46,7 +52,7 @@
              <metainf dir="spi">
                  <include name="services/**"/>
              </metainf>
-@@ -540,13 +522,6 @@
+@@ -546,13 +522,6 @@
              <fileset dir="${build.dir}/jar-complete"/>
              <zipgroupfileset dir="${build.lib.dir}" includes="${jruby.jar.zip.includes}"/>
  
