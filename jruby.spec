@@ -1,4 +1,6 @@
-%global rubygems_path %{_datadir}/rubygems
+%global jruby_vendordir %{_datadir}/%{name}/lib
+%global jruby_sitedir %{_prefix}/local/share/%{name}/lib
+%global rubygems_dir %{_datadir}/rubygems
 
 %global git_hash 4a6bb0a
 
@@ -7,7 +9,7 @@
 %global yecht_cluster olabini
 
 %global preminorver RC1
-%global release 1
+%global release 2
 
 Name:           jruby
 Version:        1.7.0
@@ -19,6 +21,7 @@ URL:            http://jruby.org/
 BuildArch:      noarch
 Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0.RC1/jruby-src-1.7.0.RC1.tar.gz
 Source1:        http://github.com/%{yecht_cluster}/yecht/tarball/0.0.2/%{yecht_cluster}-yecht-%{yecht_dlversion}.tar.gz
+Patch0:         jruby-executable-add-fedora-java-opts-stub.patch
 Patch1:         jruby-add-classpath-to-start-script.patch
 Patch2:         jruby-dont-include-jar-dependencies-in-build-xml.patch
 Patch3:         jruby-no-jar-bundling.patch
@@ -35,6 +38,8 @@ Patch7:         jruby-yecht-only-build-bindings.patch
 
 # already upstream, should be part of 1.7.0 final
 Patch8:         jruby-update-to-snakeyaml-1.11.patch
+
+Patch9:         jruby-remove-rubygems-dirs-definition.patch
 
 BuildRequires:  ant >= 1.6
 BuildRequires:  ant-junit
@@ -81,6 +86,7 @@ BuildRequires:  yecht
 #BuildRequires:  rubygem(ruby-debug-base)
 #BuildRequires:  rubygem(columnize)
 
+# Java Requires
 Requires:  bouncycastle
 Requires:  bouncycastle-mail
 Requires:  bsf
@@ -105,6 +111,9 @@ Requires:  jzlib
 Requires:  nailgun
 Requires:  objectweb-asm4
 Requires:  yydebug
+
+# Other Requires
+Requires:  rubygems
 
 #Provides:  ruby(abi) = 1.9.1
 #Provides:  ruby(abi) = 1.8
@@ -139,6 +148,7 @@ The bindings for the yecht library for internal use in jruby
 %prep
 %setup -q -n %{name}-%{version}%{?preminorver:.%{preminorver}}
 
+%patch0 -p0
 %patch1 -p0
 %patch2 -p0
 %patch3 -p0
@@ -247,6 +257,22 @@ ln -s %{_datadir}/%{name}/bin/jgem  %{buildroot}%{_bindir}/jgem
 ln -s %{_datadir}/%{name}/bin/jirb  %{buildroot}%{_bindir}/jirb
 ln -s %{_datadir}/%{name}/bin/jruby %{buildroot}%{_bindir}/jruby
 
+## Fedora integration stuff
+# modify the JRuby executable to contain Fedora specific paths redefinitons
+# we need to modify jruby{,sh,bash} to be sure everything is ok
+sed -i 's|$FEDORA_JAVA_OPTS|-Dvendor.dir.general=%{jruby_vendordir}\
+                            -Dsite.dir.general=%{jruby_sitedir}\
+                            -Dvendor.dir.rubygems=%{rubygems_dir}|' \
+  %{buildroot}%{_datadir}/%{name}/bin/jruby*
+
+# install JRuby specific bits into system RubyGems
+mkdir -p %{buildroot}%{rubygems_dir}/rubygems/defaults
+cp -a lib/ruby/shared/rubygems/defaults/* %{buildroot}%{rubygems_dir}/rubygems/defaults
+pushd %{buildroot}%{rubygems_dir}
+patch -p0 < %{PATCH9}
+popd
+
+
 # javadoc
 install -p -d -m 755 %{buildroot}%{_javadocdir}/%{name}
 cp -a docs/api/* %{buildroot}%{_javadocdir}/%{name}
@@ -272,6 +298,7 @@ cp lib/%{name}.jar build_lib/%{name}.jar
 export JRUBY_CP=$(pwd)/build_lib/jruby.jar:$(pwd)/build_lib/jruby-yecht.jar
 
 # fix the file encoding issue problem: https://github.com/jruby/jruby/pull/291
+# already accepted upstream, remove in next version
 sed -i '1 i\
 # encoding: utf-8' test/test_unicode_paths.rb
 export LANG=en_US.utf8
@@ -286,8 +313,10 @@ ant test
 %{_bindir}/jirb
 %{_datadir}/%{name}
 # exclude all of the rubygems stuff
-#%exclude %{_datadir}/%{name}/lib/ruby/shared/*ubygems*
-#%exclude %{_datadir}/%{name}/lib/ruby/shared/rbconfig
+%exclude %{_datadir}/%{name}/lib/ruby/shared/*ubygems*
+%exclude %{_datadir}/%{name}/lib/ruby/shared/rbconfig
+# own the JRuby specific files under RubyGems dir
+%{rubygems_dir}/rubygems/defaults/jruby.rb
 %{_javadir}/%{name}.jar
 
 %{_mavendepmapfragdir}/%{name}
@@ -301,6 +330,10 @@ ant test
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Thu Oct 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.2.RC1
+- Use system RubyGems.
+- Add path definition that brings JRuby closer to MRI.
+
 * Mon Oct 01 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.1.RC1
 - Updated to JRuby 1.7.0.RC2.
 
