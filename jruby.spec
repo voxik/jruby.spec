@@ -10,6 +10,7 @@
 
 %global preminorver RC1
 %global release 2
+%global enable_check 0
 
 Name:           jruby
 Version:        1.7.0
@@ -292,6 +293,7 @@ install -d -m 755 %{buildroot}%{_javadir}
 ln -s %{_datadir}/%{name}/lib/%{name}.jar %{buildroot}%{_javadir}/%{name}.jar
 
 %check
+%if 0%{?enable_check}
 cp yecht/lib/yecht-ruby-0.0.2.jar build_lib/%{name}-yecht.jar
 cp lib/%{name}.jar build_lib/%{name}.jar
 # explicitly set path to jruby.jar and jruby-yecht.jar, as they can't found by "build-classpath" used in bin/jruby
@@ -303,6 +305,7 @@ sed -i '1 i\
 # encoding: utf-8' test/test_unicode_paths.rb
 export LANG=en_US.utf8
 ant test
+%endif
 
 %files
 %doc COPYING
@@ -312,9 +315,13 @@ ant test
 %{_bindir}/jgem
 %{_bindir}/jirb
 %{_datadir}/%{name}
+# exclude bundled gems
+%exclude %{jruby_vendordir}/ruby/1.9/json*
+%exclude %{jruby_vendordir}/ruby/1.9/rdoc*
+%exclude %{jruby_vendordir}/ruby/1.9/rake*
 # exclude all of the rubygems stuff
-%exclude %{_datadir}/%{name}/lib/ruby/shared/*ubygems*
-%exclude %{_datadir}/%{name}/lib/ruby/shared/rbconfig
+%exclude %{jruby_vendordir}/ruby/shared/*ubygems*
+%exclude %{jruby_vendordir}/ruby/shared/rbconfig
 # own the JRuby specific files under RubyGems dir
 %{rubygems_dir}/rubygems/defaults/jruby.rb
 %{_javadir}/%{name}.jar
