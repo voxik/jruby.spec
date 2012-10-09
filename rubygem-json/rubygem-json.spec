@@ -1,9 +1,10 @@
 %global	gem_name	json
 %global	rubyabi	1.9.1
+%global	with_jruby_ext 1
 
 Name:           rubygem-%{gem_name}
 Version:        1.6.5
-Release:        2%{?dist}
+Release:        3%{?dist}
 
 Summary:        A JSON implementation in Ruby
 
@@ -13,6 +14,10 @@ License:        Ruby or GPLv2
 URL:            http://json.rubyforge.org
 Source0:        http://gems.rubyforge.org/gems/%{gem_name}-%{version}.gem
 
+%if 0%{?with_jruby_ext}
+BuildRequires:  jpackage-utils
+BuildRequires:  jruby
+%endif
 BuildRequires:	ruby(abi) = %{rubyabi}
 BuildRequires:	ruby-devel
 BuildRequires:  rubygems-devel
@@ -43,6 +48,18 @@ Requires:	%{name} = %{version}-%{release}
 %description	doc
 This package contains documentation for %{name}.
 
+%if 0%{?with_jruby_ext}
+%package	java
+Summary:	JRuby extension for %{name}
+Group:		Development/Languages
+
+Requires:	%{name} = %{version}-%{release}
+Requires:       jruby
+
+%description	java
+This package contains JRuby extension for %{name}.
+%endif
+
 %prep
 %setup -q -c -T
 mkdir -p ./%{gem_dir}
@@ -65,11 +82,22 @@ done
 # remove pure
 rm -fr .%{gem_instdir}/lib/json/pure*
 
+%if 0%{?with_jruby_ext}
+pushd .%{gem_instdir}
+JAVA_HOME=%{java_home} jruby /usr/bin/rake create_jar
+popd
+%endif
+
 %install
 mkdir -p $RPM_BUILD_ROOT%{gem_dir}
 mkdir -p $RPM_BUILD_ROOT%{gem_extdir}/ext/%{gem_name}/ext
  
 cp -a .%{gem_dir}/* %{buildroot}/%{gem_dir}
+
+%if 0%{?with_jruby_ext}
+mkdir -p $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
+cp -a .%{gem_instdir}/lib/json/ext/*.jar $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
+%endif
 
 # Let's move arch dependent files to arch specific directory
 cp -a ./%{gem_instdir}/ext/json/ext/json \
@@ -125,8 +153,16 @@ popd
 #%{gem_instdir}/doc-main.txt
 %{gem_docdir}/
 
+%if 0%{?with_jruby_ext}
+%files      java
+%defattr(-,root,root,-)
+%{gem_extdir_jruby}/ext
+%endif
 
 %changelog
+* Mon Oct 08 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.6.5-3
+- Provide Java extension for use with JRuby.
+
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
