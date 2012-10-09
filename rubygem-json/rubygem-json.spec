@@ -84,7 +84,7 @@ rm -fr .%{gem_instdir}/lib/json/pure*
 
 %if 0%{?with_jruby_ext}
 pushd .%{gem_instdir}
-JAVA_HOME=%{java_home} jruby /usr/bin/rake create_jar
+JAVA_HOME=%{java_home} jruby -S rake create_jar
 popd
 %endif
 
