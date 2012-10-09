@@ -1,0 +1,33 @@
+commit 4122574a48be949b1448e47d7cf41684e8fd572a
+Author: Charles Oliver Nutter <headius@headius.com>
+Date:   Fri Sep 28 17:35:42 2012 -0500
+
+    Fix error on creating a Version object with a frozen string.
+
+diff --git a/lib/rubygems/version.rb b/lib/rubygems/version.rb
+index 2ced9cc..d215a81 100644
+--- a/lib/rubygems/version.rb
++++ b/lib/rubygems/version.rb
+@@ -187,7 +187,7 @@ class Gem::Version
+     raise ArgumentError, "Malformed version number string #{version}" unless
+       self.class.correct?(version)
+ 
+-    @version = version.to_s
++    @version = version.to_s.dup
+     @version.strip!
+   end
+ 
+diff --git a/test/rubygems/test_gem_version.rb b/test/rubygems/test_gem_version.rb
+index f578063..3c26cf8 100644
+--- a/test/rubygems/test_gem_version.rb
++++ b/test/rubygems/test_gem_version.rb
+@@ -33,6 +33,9 @@ class TestGemVersion < Gem::TestCase
+     assert_same  fake, Gem::Version.create(fake)
+     assert_nil   Gem::Version.create(nil)
+     assert_equal v("5.1"), Gem::Version.create("5.1")
++    
++    ver = '1.1'.freeze
++    assert_equal v('1.1'), Gem::Version.create(ver)
+   end
+ 
+   def test_eql_eh

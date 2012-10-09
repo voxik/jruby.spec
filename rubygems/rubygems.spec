@@ -12,10 +12,12 @@
 # since noarch package cannot provide arch dependent subpackages?
 # http://rpm.org/ticket/78
 %global gem_extdir %{_exec_prefix}/lib{,64}/gems
+# JRuby exts are platform independent, but lets keep them out of Gems themselves
+%global gem_extdir_jruby %{_datadir}/gems
 
 # Executing testsuite (enabling %%check section) will cause dependency loop.
 # To avoid dependency loop when necessary, please set the following value to 0
-%global	enable_check	1
+%global	enable_check	0
 
 # It cannot be relied on %%{_libdir} for noarch packages. Query Ruby for
 # the right value.
@@ -26,7 +28,7 @@
 Summary:	The Ruby standard for packaging ruby libraries
 Name:		rubygems
 Version:	1.8.24
-Release:	3%{?dist}
+Release:	4%{?dist}
 Group:		Development/Libraries
 License:	Ruby or MIT
 
@@ -60,6 +62,16 @@ Patch105:	ruby-1.9.3-rubygems-1.8.11-uninstaller.patch
 # https://github.com/rubygems/rubygems/issues/210
 Patch109:	rubygems-1.8.11-binary-extensions.patch
 
+### Patches to enable JRuby support.
+# This change seems to have originated in commit
+# https://github.com/jruby/jruby/commit/b471d3eae1a3d36ae9d085c4f4f3ef73bf875042
+# Proposed upstream at https://github.com/rubygems/rubygems/pull/371, not yet accepted
+Patch200:	rubygems-path-support-recognize-java-protocols.patch
+
+# Patches 201 and 202 have been accepted upstream, but not (yet) backported
+# to 1.8 branch.
+Patch201:	rubygems-add-missing-load_yaml.patch
+Patch202:	rubygems-fix-version-created-with-frozen-string.patch
 
 Requires:	ruby(abi) = 1.9.1
 Requires:	rubygem(rdoc) >= 3.9.4
@@ -105,6 +117,10 @@ Macros and development tools for packagin RubyGems.
 %patch105 -p1 -b .uninst
 %patch109 -p1 -b .bindir
 
+%patch200 -p1 -b .path_support
+%patch201 -p1 -b .load_yaml
+%patch202 -p1 -b .frozen
+
 # Some of the library files start with #! which rpmlint doesn't like
 # and doesn't make much sense
 for f in `find lib -name \*.rb` ; do
@@ -138,7 +154,8 @@ ln -sf %{_sysconfdir}/pki/tls/cert.pem \
 
 # Create gem folders.
 mkdir -p %{buildroot}%{gem_dir}/{cache,gems,specifications,doc}
-mkdir -p %{buildroot}%{gem_extdir}/exts
+mkdir -p %{buildroot}%{gem_extdir}/ruby
+mkdir -p %{buildroot}%{gem_extdir_jruby}/jruby
 
 # Create macros.rubygems file for rubygems-devel
 mkdir -p %{buildroot}%{_sysconfdir}/rpm
@@ -149,11 +166,13 @@ cat >> %{buildroot}%{_sysconfdir}/rpm/macros.rubygems << \EOF
 
 # Common gem locations and files.
 %%gem_instdir %%{gem_dir}/gems/%%{gem_name}-%%{version}
-%%gem_extdir %%{_libdir}/gems/exts/%%{gem_name}-%%{version}
+%%gem_extdir %%{_libdir}/gems/ruby/%%{gem_name}-%%{version}
 %%gem_libdir %%{gem_instdir}/lib
 %%gem_cache %%{gem_dir}/cache/%%{gem_name}-%%{version}.gem
 %%gem_spec %%{gem_dir}/specifications/%%{gem_name}-%%{version}.gemspec
 %%gem_docdir %%{gem_dir}/doc/%%{gem_name}-%%{version}
+# for JRuby
+%%gem_extdir_jruby %%{gem_dir}/jruby/%%{gem_name}-%%{version}
 EOF
 
 %if %{enable_check}
@@ -194,13 +213,19 @@ testrb test
 
 %dir %{_exec_prefix}/lib/gems
 %dir %{_exec_prefix}/lib64/gems
-%dir %{_exec_prefix}/lib/gems/exts
-%dir %{_exec_prefix}/lib64/gems/exts
+%dir %{_exec_prefix}/lib/gems/ruby
+%dir %{_exec_prefix}/lib64/gems/ruby
+# for JRuby exts
+%dir %{_datadir}/gems/jruby
 
 %files	devel
 %config(noreplace)  %{_sysconfdir}/rpm/macros.rubygems
 
 %changelog
+* Tue Oct 02 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.8.24-4
+- Add JRuby specific patches.
+- Add JRuby extdir macro and directory.
+
 * Wed Sep 05 2012 Vít Ondruch <vondruch@redhat.com> - 1.8.24-3
 - Fixed Fedora 18 mass rebuild issue.
 

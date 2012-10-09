@@ -1,0 +1,18 @@
+commit e2977afae5dea3c1f6bb8e74b9210fe1e825bb79
+Author: Charles Oliver Nutter <headius@headius.com>
+Date:   Tue Dec 20 01:04:26 2011 -0600
+
+    Fix missing load_yaml in YAML-related requirement.rb code.
+
+diff --git a/lib/rubygems/requirement.rb b/lib/rubygems/requirement.rb
+index 7abff01..efde4fd 100644
+--- a/lib/rubygems/requirement.rb
++++ b/lib/rubygems/requirement.rb
+@@ -135,6 +135,7 @@ class Gem::Requirement
+       instance_variable_set "@#{ivar}", val
+     end
+ 
++    Gem.load_yaml
+     fix_syck_default_key_in_requirements
+   end
+ 
