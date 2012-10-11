@@ -8,9 +8,9 @@
 %global yecht_dlversion 0.0.2-0-g%{yecht_commitversion}
 %global yecht_cluster olabini
 
-%global preminorver RC1
-%global release 2
-%global enable_check 0
+%global preminorver RC2
+%global release 3
+%global enable_check 1
 
 Name:           jruby
 Version:        1.7.0
@@ -20,7 +20,7 @@ Group:          Development/Languages
 License:        (CPL or GPLv2+ or LGPLv2+) and ASL 1.1 and MIT and Ruby
 URL:            http://jruby.org/
 BuildArch:      noarch
-Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0.RC1/jruby-src-1.7.0.RC1.tar.gz
+Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0.RC2/jruby-src-1.7.0.RC2.tar.gz
 Source1:        http://github.com/%{yecht_cluster}/yecht/tarball/0.0.2/%{yecht_cluster}-yecht-%{yecht_dlversion}.tar.gz
 Patch0:         jruby-executable-add-fedora-java-opts-stub.patch
 Patch1:         jruby-add-classpath-to-start-script.patch
@@ -36,9 +36,6 @@ Patch4:         jruby-comment-out-hanging-socket-test.patch
 Patch6:         jruby-remove-builtin-yecht-jar.patch
 
 Patch7:         jruby-yecht-only-build-bindings.patch
-
-# already upstream, should be part of 1.7.0 final
-Patch8:         jruby-update-to-snakeyaml-1.11.patch
 
 Patch9:         jruby-remove-rubygems-dirs-definition.patch
 
@@ -155,7 +152,6 @@ The bindings for the yecht library for internal use in jruby
 %patch3 -p0
 %patch4 -p0
 %patch6 -p0
-%patch8 -p1
 
 tar xzvf %{SOURCE1}
 mv %{yecht_cluster}-yecht-%{yecht_commitversion} yecht
@@ -299,10 +295,6 @@ cp lib/%{name}.jar build_lib/%{name}.jar
 # explicitly set path to jruby.jar and jruby-yecht.jar, as they can't found by "build-classpath" used in bin/jruby
 export JRUBY_CP=$(pwd)/build_lib/jruby.jar:$(pwd)/build_lib/jruby-yecht.jar
 
-# fix the file encoding issue problem: https://github.com/jruby/jruby/pull/291
-# already accepted upstream, remove in next version
-sed -i '1 i\
-# encoding: utf-8' test/test_unicode_paths.rb
 export LANG=en_US.utf8
 ant test
 %endif
@@ -337,12 +329,15 @@ ant test
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Thu Oct 11 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.3.RC2
+- Updated to JRuby 1.7.0.RC2.
+
 * Thu Oct 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.2.RC1
 - Use system RubyGems.
 - Add path definition that brings JRuby closer to MRI.
 
 * Mon Oct 01 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.1.RC1
-- Updated to JRuby 1.7.0.RC2.
+- Updated to JRuby 1.7.0.RC1.
 
 * Tue Sep 11 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.1.preview2
 - Updated to JRuby 1.7.0.preview2.
