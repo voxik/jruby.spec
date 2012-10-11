@@ -250,8 +250,8 @@ cp -ar bin/     %{buildroot}%{_datadir}/%{name}/ # startup scripts
 
 # /usr prefix startup scripts
 install -d -m 755 %{buildroot}%{_bindir}
-ln -s %{_datadir}/%{name}/bin/jgem  %{buildroot}%{_bindir}/jgem
-ln -s %{_datadir}/%{name}/bin/jirb  %{buildroot}%{_bindir}/jirb
+ln -s %{_datadir}/%{name}/bin/jgem  %{buildroot}%{_bindir}/gem-jruby
+ln -s %{_datadir}/%{name}/bin/jirb  %{buildroot}%{_bindir}/irb-jruby
 ln -s %{_datadir}/%{name}/bin/jruby %{buildroot}%{_bindir}/jruby
 
 ## Fedora integration stuff
@@ -304,8 +304,8 @@ ant test
 %doc docs/CodeConventions.txt docs/README.test
 
 %{_bindir}/%{name}
-%{_bindir}/jgem
-%{_bindir}/jirb
+%{_bindir}/gem-jruby
+%{_bindir}/irb-jruby
 %{_datadir}/%{name}
 # exclude bundled gems
 %exclude %{jruby_vendordir}/ruby/1.9/json*
@@ -331,6 +331,7 @@ ant test
 %changelog
 * Thu Oct 11 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.3.RC2
 - Updated to JRuby 1.7.0.RC2.
+- Rename jirb and jgem to irb-jruby and gem-jruby.
 
 * Thu Oct 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.2.RC1
 - Use system RubyGems.
