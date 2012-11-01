@@ -8,8 +8,8 @@
 %global yecht_dlversion 0.0.2-0-g%{yecht_commitversion}
 %global yecht_cluster olabini
 
-%global preminorver RC2
-%global release 3
+#%%global preminorver RC2
+%global release 1
 %global enable_check 1
 
 Name:           jruby
@@ -20,7 +20,7 @@ Group:          Development/Languages
 License:        (CPL or GPLv2+ or LGPLv2+) and ASL 1.1 and MIT and Ruby
 URL:            http://jruby.org/
 BuildArch:      noarch
-Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0.RC2/jruby-src-1.7.0.RC2.tar.gz
+Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0/jruby-src-1.7.0.tar.gz
 Source1:        http://github.com/%{yecht_cluster}/yecht/tarball/0.0.2/%{yecht_cluster}-yecht-%{yecht_dlversion}.tar.gz
 Patch0:         jruby-executable-add-fedora-java-opts-stub.patch
 Patch1:         jruby-add-classpath-to-start-script.patch
@@ -113,9 +113,11 @@ Requires:  yydebug
 # Other Requires
 Requires:  rubygems
 
-#Provides:  ruby(abi) = 1.9.1
-#Provides:  ruby(abi) = 1.8
-#Provides:  ruby(irb)
+Provides:  ruby(abi) = 1.9.1
+Provides:  ruby(abi) = 1.8
+Provides:  ruby(irb)
+Provides:  rubygem(bigdecimal)
+Provides:  rubygem(io-console)
 
 %description
 JRuby is a 100% Java implementation of the Ruby programming language.
@@ -329,6 +331,9 @@ ant test
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Tue Oct 23 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-1
+- Updated to JRuby 1.7.0.
+
 * Thu Oct 11 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-0.3.RC2
 - Updated to JRuby 1.7.0.RC2.
 - Rename jirb and jgem to irb-jruby and gem-jruby.
