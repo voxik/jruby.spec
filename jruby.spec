@@ -115,9 +115,9 @@ Requires:  rubygems
 
 Provides:  ruby(abi) = 1.9.1
 Provides:  ruby(abi) = 1.8
-Provides:  ruby(irb)
-Provides:  rubygem(bigdecimal)
-Provides:  rubygem(io-console)
+#Provides:  ruby(irb)
+#Provides:  rubygem(bigdecimal)
+#Provides:  rubygem(io-console)
 
 %description
 JRuby is a 100% Java implementation of the Ruby programming language.
