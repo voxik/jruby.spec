@@ -7,7 +7,7 @@
 +j=$(build-classpath objectweb-asm4/asm objectweb-asm4/asm-util \
 +    objectweb-asm4/all objectweb-asm4/asm-commons objectweb-asm4/asm-analysis objectweb-asm4/asm-tree bcmail bcprov bsf bytelist \
 +    felix/org.osgi.core invokebinder jansi jcodings jffi jline2 jna jnr-constants jnr-enxio jnr-ffi jnr-netdb jnr-posix jnr-unixsocket \
-+    joda-time joni jzlib nailgun yydebug yecht jruby jruby-yecht )
++    joda-time joni jzlib nailgun snakeyaml yydebug yecht jruby jruby-yecht )
 +
 +JRUBY_CP="$JRUBY_CP$CP_DELIMETER$j"
 +
@@ -23,7 +23,7 @@
 +j=$(build-classpath objectweb-asm4/asm objectweb-asm4/asm-util \
 +    objectweb-asm4/all objectweb-asm4/asm-commons objectweb-asm4/asm-analysis objectweb-asm4/asm-tree bcmail bcprov bsf bytelist \
 +    felix/org.osgi.core invokebinder jansi jcodings jffi jline2 jna jnr-constants jnr-enxio jnr-ffi jnr-netdb jnr-posix jnr-unixsocket \
-+    joda-time joni jzlib nailgun yydebug yecht jruby jruby-yecht )
++    joda-time joni jzlib nailgun snakeyaml yydebug yecht jruby jruby-yecht )
 +
 +JRUBY_CP="$JRUBY_CP$CP_DELIMETER$j"
 +
