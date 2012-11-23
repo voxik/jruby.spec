@@ -4,7 +4,7 @@
 
 Name:           rubygem-%{gem_name}
 Version:        1.6.5
-Release:        3%{?dist}
+Release:        4%{?dist}
 
 Summary:        A JSON implementation in Ruby
 
@@ -13,10 +13,16 @@ Group:          Development/Languages
 License:        Ruby or GPLv2
 URL:            http://json.rubyforge.org
 Source0:        http://gems.rubyforge.org/gems/%{gem_name}-%{version}.gem
-
 %if 0%{?with_jruby_ext}
+Source1:        http://gems.rubyforge.org/gems/%{gem_name}-%{version}-java.gem
+Patch0:         json-add-classpath-to-jar-build.patch
+
+BuildRequires:  java-devel
 BuildRequires:  jpackage-utils
 BuildRequires:  jruby
+# when doing gem-jruby install, rdoc needs json_pure, because it can't load MRI
+# json's ext - worse dep loop than in MRI :(
+BuildRequires:  rubygem-json_pure
 %endif
 BuildRequires:	ruby(abi) = %{rubyabi}
 BuildRequires:	ruby-devel
@@ -63,10 +69,17 @@ This package contains JRuby extension for %{name}.
 %prep
 %setup -q -c -T
 mkdir -p ./%{gem_dir}
-
-%build
 export CONFIGURE_ARGS="--with-cflags='%{optflags}'"
 gem install --local --install-dir .%{gem_dir} -V --force %{SOURCE0}
+
+%if 0%{with_jruby_ext}
+gem-jruby install --local --install-dir .%{gem_dir} -V --force %{SOURCE1}
+pushd .%{gem_instdir}
+%patch0
+popd
+%endif
+
+%build
 
 find . -name \*gem -exec chmod 0644 {} \;
 
@@ -83,7 +96,10 @@ done
 rm -fr .%{gem_instdir}/lib/json/pure*
 
 %if 0%{?with_jruby_ext}
+
 pushd .%{gem_instdir}
+CLASSPATH=$(build-classpath bytelist jnr-constants jcodings)
+sed -i "s|CLASSPATH|$CLASSPATH|" Rakefile
 JAVA_HOME=%{java_home} jruby -S rake create_jar
 popd
 %endif
@@ -95,8 +111,13 @@ mkdir -p $RPM_BUILD_ROOT%{gem_extdir}/ext/%{gem_name}/ext
 cp -a .%{gem_dir}/* %{buildroot}/%{gem_dir}
 
 %if 0%{?with_jruby_ext}
-mkdir -p $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
-cp -a .%{gem_instdir}/lib/json/ext/*.jar $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
+# the noarch part is common, so just link to it
+rm -fr %{buildroot}%{gem_instdir_java}
+ln -s %{gem_instdir} %{buildroot}%{gem_instdir_java}
+# create java extdir and make the gemspec aware of extensions, so that they get loaded
+mkdir -p $RPM_BUILD_ROOT%{gem_extdir_java}/ext/%{gem_name}/ext/%{gem_name}/ext
+cp -a .%{gem_instdir}/lib/json/ext/*.jar $RPM_BUILD_ROOT%{gem_extdir_java}/ext/%{gem_name}/ext/%{gem_name}/ext
+sed -i 's|"lib"]|"ext/json/ext", "ext", "lib"]\ns.extensions = ["doesnt_matter_whats_here"]|' %{buildroot}%{gem_spec_java}
 %endif
 
 # Let's move arch dependent files to arch specific directory
@@ -156,10 +177,17 @@ popd
 %if 0%{?with_jruby_ext}
 %files      java
 %defattr(-,root,root,-)
-%{gem_extdir_jruby}/ext
+%exclude %{gem_cache_java}
+%{gem_instdir_java}
+%{gem_spec_java}
+%{gem_extdir_java}
 %endif
 
 %changelog
+* Fri Nov 02 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.6.5-4
+- Use the -java gem to get separate gemspec for JRuby ext.
+- Utilize new RubyGems JRuby macros.
+
 * Mon Oct 08 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.6.5-3
 - Provide Java extension for use with JRuby.
 

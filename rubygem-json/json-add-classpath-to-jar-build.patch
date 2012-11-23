@@ -1,0 +1,11 @@
+--- Rakefile.orig	2012-11-22 13:30:34.000000000 +0100
++++ Rakefile	2012-11-22 13:37:29.865361142 +0100
+@@ -228,7 +228,7 @@
+   JRUBY_JAR = File.join(CONFIG["libdir"], "jruby.jar")
+   if File.exist?(JRUBY_JAR)
+     JAVA_SOURCES.each do |src|
+-      classpath = (Dir['java/lib/*.jar'] << 'java/src' << JRUBY_JAR) * ':'
++      classpath = (Dir['java/lib/*.jar'] << 'java/src' << JRUBY_JAR << 'CLASSPATH') * ':'
+       obj = src.sub(/\.java\Z/, '.class')
+       file obj => src do
+         sh 'javac', '-classpath', classpath, '-source', '1.5', '-target', '1.5', src
