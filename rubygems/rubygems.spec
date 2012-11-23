@@ -28,7 +28,7 @@
 Summary:	The Ruby standard for packaging ruby libraries
 Name:		rubygems
 Version:	1.8.24
-Release:	4%{?dist}
+Release:	5%{?dist}
 Group:		Development/Libraries
 License:	Ruby or MIT
 
@@ -172,7 +172,12 @@ cat >> %{buildroot}%{_sysconfdir}/rpm/macros.rubygems << \EOF
 %%gem_spec %%{gem_dir}/specifications/%%{gem_name}-%%{version}.gemspec
 %%gem_docdir %%{gem_dir}/doc/%%{gem_name}-%%{version}
 # for JRuby
+%%gem_instdir_java %%{gem_dir}/gems/%%{gem_name}-%%{version}-java
 %%gem_extdir_jruby %%{gem_dir}/jruby/%%{gem_name}-%%{version}
+%%gem_extdir_java %%{gem_extdir_jruby}-java
+%%gem_libdir_java %%{gem_instdir_java}/lib
+%%gem_cache_java %%{gem_dir}/cache/%%{gem_name}-%%{version}-java.gem
+%%gem_spec_java %%{gem_dir}/specifications/%%{gem_name}-%%{version}-java.gemspec
 EOF
 
 %if %{enable_check}
@@ -222,6 +227,9 @@ testrb test
 %config(noreplace)  %{_sysconfdir}/rpm/macros.rubygems
 
 %changelog
+* Thu Nov 22 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.8.24-5
+- Refine and add new JRuby macros.
+
 * Tue Oct 02 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.8.24-4
 - Add JRuby specific patches.
 - Add JRuby extdir macro and directory.
