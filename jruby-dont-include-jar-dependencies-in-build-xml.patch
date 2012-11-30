@@ -46,7 +46,7 @@
 -          nailgun-0.7.1.jar
 -          jzlib-1.1.0.jar
 -          invokebinder.jar"/>
-+    <property name="jruby.jar.zip.includes" value=""/>
++    <property name="jruby.jar.zip.includes" value="cant_leave_this_blank_because_all_files_would_be_used"/>
  
      <target name="jar-jruby" depends="init, compile, unzip-native-libs" unless="jar-up-to-date, jar-jruby.hasrun">
          <jar destfile="${lib.dir}/jruby.jar" compress="true" index="true" update="true">

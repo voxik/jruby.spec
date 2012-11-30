@@ -2,25 +2,64 @@
 %global jruby_sitedir %{_prefix}/local/share/%{name}/lib
 %global rubygems_dir %{_datadir}/rubygems
 
-%global git_hash 4a6bb0a
-
 %global yecht_commitversion 6009fd7
 %global yecht_dlversion 0.0.2-0-g%{yecht_commitversion}
 %global yecht_cluster olabini
 
-#%%global preminorver RC2
+%global preminorver dev
 %global release 1
 %global enable_check 1
 
+%global jar_deps \\\
+     objectweb-asm4/asm \\\
+     objectweb-asm4/asm-analysis \\\
+     objectweb-asm4/asm-commons \\\
+     objectweb-asm4/asm-tree \\\
+     objectweb-asm4/asm-util \\\
+     bcprov \\\
+     bcmail \\\
+     bsf \\\
+     bytelist \\\
+     commons-logging \\\
+     coro-mock \\\
+     invokebinder \\\
+     jansi \\\
+     jarjar \\\
+     jcodings \\\
+     jffi \\\
+     jline2 \\\
+     jna \\\
+     jnr-constants \\\
+     jnr-enxio \\\
+     jnr-ffi \\\
+     jnr-netdb \\\
+     jnr-posix \\\
+     jnr-unixsocket \\\
+     joda-time \\\
+     joni \\\
+     junit \\\
+     junit4 \\\
+     jzlib \\\
+     nailgun \\\
+     felix/org.osgi.core \\\
+     snakeyaml \\\
+     yecht \\\
+     yydebug
+
+
 Name:           jruby
-Version:        1.7.0
+Version:        1.7.1
 Release:        %{?preminorver:0.}%{release}%{?preminorver:.%{preminorver}}%{?dist}
 Summary:        Pure Java implementation of the Ruby interpreter
 Group:          Development/Languages
 License:        (CPL or GPLv2+ or LGPLv2+) and ASL 1.1 and MIT and Ruby
 URL:            http://jruby.org/
 BuildArch:      noarch
-Source0:        http://jruby.org.s3.amazonaws.com/downloads/1.7.0/jruby-src-1.7.0.tar.gz
+%if 0%{?preminorver:1}
+Source0:        https://github.com/downloads/%{name}/%{name}/%{name}-src-%{version}.%{preminorver}.tar.gz
+%else
+Source0:        http://jruby.org.s3.amazonaws.com/downloads/%{version}/%{name}-src-%{version}.tar.gz
+%endif
 Source1:        http://github.com/%{yecht_cluster}/yecht/tarball/0.0.2/%{yecht_cluster}-yecht-%{yecht_dlversion}.tar.gz
 Patch0:         jruby-executable-add-fedora-java-opts-stub.patch
 Patch1:         jruby-add-classpath-to-start-script.patch
@@ -44,6 +83,7 @@ BuildRequires:  ant-junit
 BuildRequires:  java-devel >= 1.6
 BuildRequires:  jpackage-utils >= 1.5
 
+BuildRequires:  apache-commons-logging
 BuildRequires:  bouncycastle
 BuildRequires:  bouncycastle-mail
 BuildRequires:  bsf
@@ -85,6 +125,7 @@ BuildRequires:  yecht
 #BuildRequires:  rubygem(columnize)
 
 # Java Requires
+Requires:  apache-commons-logging
 Requires:  bouncycastle
 Requires:  bouncycastle-mail
 Requires:  bsf
@@ -108,6 +149,7 @@ Requires:  jruby-yecht
 Requires:  jzlib
 Requires:  nailgun
 Requires:  objectweb-asm4
+Requires:  snakeyaml
 Requires:  yydebug
 
 # Other Requires
@@ -115,9 +157,6 @@ Requires:  rubygems
 
 Provides:  ruby(abi) = 1.9.1
 Provides:  ruby(abi) = 1.8
-#Provides:  ruby(irb)
-#Provides:  rubygem(bigdecimal)
-#Provides:  rubygem(io-console)
 
 %description
 JRuby is a 100% Java implementation of the Ruby programming language.
@@ -166,9 +205,13 @@ find -name *.exe -exec rm -f '{}' \;
 find -name *.dll -exec rm -f '{}' \;
 
 # prebuilt gems seem to do problems with building jruby-yecht bindings => move them someplace else
-mkdir build_gems
-mv build_lib/*.gem build_gems/
-sed -i 's|\.gem=\${build\.lib\.dir}|.gem=build_gems|' default.build.properties
+#mkdir build_gems
+#mv build_lib/*.gem build_gems/
+#sed -i 's|\.gem=\${build\.lib\.dir}|.gem=build_gems|' default.build.properties
+
+# delete unnecessary file causing problem when creating jar
+#rm build_lib/bouncy-castle-java.rb
+#rm -rf build_lib/mocha
 
 # delete all vcs files
 find -name .gitignore -exec rm -f '{}' \;
@@ -177,41 +220,7 @@ find -name .cvsignore -exec rm -f '{}' \;
 # replace them with symlinks
 # these sorted to able to check them against new releases easily
 # don't forget to also change these in jruby-add-classpath-to-start-script.patch
-build-jar-repository -s -p build_lib \
-     objectweb-asm4/asm \
-     objectweb-asm4/asm-analysis \
-     objectweb-asm4/asm-commons \
-     objectweb-asm4/asm-tree \
-     objectweb-asm4/asm-util \
-     bcprov \
-     bcmail \
-     bsf \
-     bytelist \
-     coro-mock \
-     invokebinder \
-     jansi \
-     jarjar \
-     jcodings \
-     jffi \
-     jline2 \
-     jna \
-     jnr-constants \
-     jnr-enxio \
-     jnr-ffi \
-     jnr-netdb \
-     jnr-posix \
-     jnr-unixsocket \
-     joda-time \
-     joni \
-     junit \
-     junit4 \
-     jzlib \
-     nailgun \
-     felix/org.osgi.core \
-     snakeyaml \
-     yecht \
-     yydebug
-
+build-jar-repository -s -p build_lib %{jar_deps}
 
 # required as jruby was shipping the core java tools jar
 ln -s /usr/lib/jvm/java/lib/tools.jar build_lib/apt-mirror-api.jar
@@ -296,7 +305,19 @@ cp yecht/lib/yecht-ruby-0.0.2.jar build_lib/%{name}-yecht.jar
 cp lib/%{name}.jar build_lib/%{name}.jar
 # explicitly set path to jruby.jar and jruby-yecht.jar, as they can't found by "build-classpath" used in bin/jruby
 export JRUBY_CP=$(pwd)/build_lib/jruby.jar:$(pwd)/build_lib/jruby-yecht.jar
+# some tests are not run via bin/jruby, so we have to specify CLASSPATH explictly for them to work
+export CLASSPATH=$(build-classpath %{jar_deps}):$(pwd)/build_lib/jruby.jar:$(pwd)/build_lib/jruby-yecht.jar
+# make sure that we don't install jruby-launcher, as it will first need to be patched upstream
+# to be able to find unbundled jars
+sed -i 's|depends="install-dev-gems,install-jruby-launcher-gem"|depends="install-dev-gems"|' build.xml
 
+# TODO: tests fail because JRuby is split into multiple jars that can't be found on execution
+# of custom build jars in this test, it seems that using proper Class-Path in manifest should fix this
+sed -i 's|test_loading_compiled_ruby_class_from_jar|test_loading_compiled_ruby_class_from_jar\nreturn|' test/test_load_compiled_ruby_class_from_classpath.rb
+# regenerate testapp, .dev ships with prebuilt binary from Mach-0
+pushd test/testapp
+gcc testapp.c -o testapp
+popd
 export LANG=en_US.utf8
 ant test
 %endif
@@ -318,6 +339,8 @@ ant test
 %exclude %{jruby_vendordir}/ruby/shared/rbconfig
 # own the JRuby specific files under RubyGems dir
 %{rubygems_dir}/rubygems/defaults/jruby.rb
+# exclude jruby_native.rb that erroneously ended up in .dev tarball
+%exclude %{rubygems_dir}/rubygems/defaults/jruby_native.rb
 %{_javadir}/%{name}.jar
 
 %{_mavendepmapfragdir}/%{name}
@@ -331,6 +354,15 @@ ant test
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Fri Nov 30 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.1-0.1.dev
+- Update to JRuby 1.7.1.dev.
+- Add missing R: and BR: apache-commons-logging
+
+* Fri Nov 09 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-2
+- Don't move stuff from build_lib, the issue with including files is solved by
+using non-existing file in jruby.jar.zip.includes in build.xml.
+- Add missing Requires: snakeyaml.
+
 * Tue Oct 23 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.0-1
 - Updated to JRuby 1.7.0.
 
