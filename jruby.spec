@@ -6,7 +6,7 @@
 %global yecht_dlversion 0.0.2-0-g%{yecht_commitversion}
 %global yecht_cluster olabini
 
-%global preminorver dev
+#%%global preminorver dev
 %global release 1
 %global enable_check 1
 
@@ -52,7 +52,11 @@ Version:        1.7.1
 Release:        %{?preminorver:0.}%{release}%{?preminorver:.%{preminorver}}%{?dist}
 Summary:        Pure Java implementation of the Ruby interpreter
 Group:          Development/Languages
-License:        (CPL or GPLv2+ or LGPLv2+) and ASL 1.1 and MIT and Ruby
+# (CPL or GPLv2+ or LGPLv2+) - JRuby itself
+# BSD - some files under lib/ruby/shared
+# (GPLv2 or Ruby) - Ruby 1.8 stdlib
+# (BSD or Ruby) - Ruby 1.9 stdlib
+License:        (CPL or GPLv2+ or LGPLv2+) and BSD and (GPLv2 or Ruby) and (BSD or Ruby)
 URL:            http://jruby.org/
 BuildArch:      noarch
 %if 0%{?preminorver:1}
@@ -176,6 +180,7 @@ Javadoc for %{name}.
 # http://jira.codehaus.org/browse/JRUBY-5352
 %package        yecht
 Summary:        Bindings used to load yecht in jruby
+License:        MIT
 Group:          Development/Libraries
 BuildRequires:  yecht
 Requires:       yecht
@@ -312,18 +317,15 @@ export CLASSPATH=$(build-classpath %{jar_deps}):$(pwd)/build_lib/jruby.jar:$(pwd
 sed -i 's|depends="install-dev-gems,install-jruby-launcher-gem"|depends="install-dev-gems"|' build.xml
 
 # TODO: tests fail because JRuby is split into multiple jars that can't be found on execution
-# of custom build jars in this test, it seems that using proper Class-Path in manifest should fix this
+# of custom built jars in this test, it seems that using proper Class-Path in manifest should fix this
 sed -i 's|test_loading_compiled_ruby_class_from_jar|test_loading_compiled_ruby_class_from_jar\nreturn|' test/test_load_compiled_ruby_class_from_classpath.rb
-# regenerate testapp, .dev ships with prebuilt binary from Mach-0
-pushd test/testapp
-gcc testapp.c -o testapp
-popd
+
 export LANG=en_US.utf8
 ant test
 %endif
 
 %files
-%doc COPYING
+%doc COPYING LICENSE.RUBY
 %doc docs/CodeConventions.txt docs/README.test
 
 %{_bindir}/%{name}
@@ -334,6 +336,7 @@ ant test
 %exclude %{jruby_vendordir}/ruby/1.9/json*
 %exclude %{jruby_vendordir}/ruby/1.9/rdoc*
 %exclude %{jruby_vendordir}/ruby/1.9/rake*
+%exclude %{jruby_vendordir}/ruby/gems
 # exclude all of the rubygems stuff
 %exclude %{jruby_vendordir}/ruby/shared/*ubygems*
 %exclude %{jruby_vendordir}/ruby/shared/rbconfig
@@ -347,13 +350,21 @@ ant test
 %{_mavenpomdir}/*
 
 %files javadoc
+%doc COPYING LICENSE.RUBY
 %{_javadocdir}/%{name}
 
 %files yecht
+%doc yecht/LICENSE
 %{_datadir}/%{name}-yecht.jar
 %{_javadir}/%{name}-yecht.jar
 
 %changelog
+* Tue Dec 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.1-1
+- Update to JRuby 1.7.1.
+- Update license tags.
+- Include licensing files in all independent RPMs generated from this SRPM.
+- Exclude the forgotten gems directory from vendordir.
+
 * Fri Nov 30 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.1-0.1.dev
 - Update to JRuby 1.7.1.dev.
 - Add missing R: and BR: apache-commons-logging
