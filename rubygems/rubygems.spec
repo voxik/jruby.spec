@@ -77,6 +77,7 @@ Requires:	ruby(abi) = 1.9.1
 Requires:	rubygem(rdoc) >= 3.9.4
 Requires:	rubygem(io-console) >= 0.3
 Requires:	ca-certificates
+BuildRequires:  ruby
 BuildRequires:	ruby(abi) = 1.9.1
 %if %{enable_check}
 # For mkmf.rb
