@@ -7,7 +7,7 @@
 %global yecht_cluster olabini
 
 #%%global preminorver dev
-%global release 1
+%global release 2
 %global enable_check 1
 
 %global jar_deps \\\
@@ -81,6 +81,9 @@ Patch6:         jruby-remove-builtin-yecht-jar.patch
 Patch7:         jruby-yecht-only-build-bindings.patch
 
 Patch9:         jruby-remove-rubygems-dirs-definition.patch
+
+# submitted upstream: https://github.com/jruby/jruby/pull/431
+Patch10:        jruby-fix-sitedir-path.patch
 
 BuildRequires:  ant >= 1.6
 BuildRequires:  ant-junit
@@ -157,7 +160,9 @@ Requires:  snakeyaml
 Requires:  yydebug
 
 # Other Requires
+Requires:  jpackage-utils
 Requires:  rubygems
+Requires:  multiruby
 
 Provides:  ruby(abi) = 1.9.1
 Provides:  ruby(abi) = 1.8
@@ -189,6 +194,15 @@ Requires:       %{name} = %{version}-%{release}
 %description yecht
 The bindings for the yecht library for internal use in jruby
 
+%package        devel
+Summary:        JRuby development environment
+Group:          Development/Languages
+Requires:       jruby
+Requires:       jpackage-utils
+
+%description    devel
+Macros for building JRuby-specific libraries.
+
 %prep
 %setup -q -n %{name}-%{version}%{?preminorver:.%{preminorver}}
 
@@ -198,6 +212,7 @@ The bindings for the yecht library for internal use in jruby
 %patch3 -p0
 %patch4 -p0
 %patch6 -p0
+%patch10 -p1
 
 tar xzvf %{SOURCE1}
 mv %{yecht_cluster}-yecht-%{yecht_commitversion} yecht
@@ -285,6 +300,19 @@ pushd %{buildroot}%{rubygems_dir}
 patch -p0 < %{PATCH9}
 popd
 
+# macros.jruby
+
+# Dump the macros into macros.jruby to use them to build other JRuby libraries.
+mkdir -p %{buildroot}%{_sysconfdir}/rpm
+cat >> %{buildroot}%{_sysconfdir}/rpm/macros.jruby << \EOF
+%%jruby_libdir %%{_datadir}/%{name}/lib/ruby/1.9
+
+# This is the general location for libs/archs compatible with all
+# or most of the Ruby versions available in the Fedora repositories.
+%%jruby_vendordir vendor_ruby
+%%jruby_vendorlibdir %%{jruby_libdir}/%%{jruby_vendordir}
+%%jruby_vendorarchdir %%{jruby_vendorlibdir}
+EOF
 
 # javadoc
 install -p -d -m 755 %{buildroot}%{_javadocdir}/%{name}
@@ -358,7 +386,15 @@ ant test
 %{_datadir}/%{name}-yecht.jar
 %{_javadir}/%{name}-yecht.jar
 
+%files devel
+%{_sysconfdir}/rpm/macros.jruby
+
 %changelog
+* Fri Dec 07 2012 Bohuslav Kabrda <bkabrda@redhat.com> -1.7.1-2
+- Included -devel subpackage with macros.jruby.
+- Added missing Requires: jpackage-utils.
+- Added a patch for sitedir path.
+
 * Tue Dec 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.7.1-1
 - Update to JRuby 1.7.1.
 - Update license tags.

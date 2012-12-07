@@ -1,0 +1,13 @@
+diff --git a/src/org/jruby/ext/rbconfig/RbConfigLibrary.java b/src/org/jruby/ext/rbconfig/RbConfigLibrary.java
+index ee45754..a94635f 100644
+--- a/src/org/jruby/ext/rbconfig/RbConfigLibrary.java
++++ b/src/org/jruby/ext/rbconfig/RbConfigLibrary.java
+@@ -185,7 +185,7 @@ public class RbConfigLibrary implements Library {
+     }
+ 
+     public static String getSiteDir(Ruby runtime) {
+-        return new NormalizedFile(getSiteDirGeneral(runtime), "ruby/site_ruby").getPath();
++        return new NormalizedFile(getSiteDirGeneral(runtime), String.format("ruby/%s/site_ruby", getRuntimeVerStr(runtime))).getPath();
+     }
+ 
+     public static String getSiteLibDir(Ruby runtime) {
