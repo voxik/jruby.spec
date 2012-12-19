@@ -17,8 +17,8 @@ module Gem
 
     def default_locations
       @default_locations ||= {
-        :system => previous_but_one_dir_to(ConfigMap[:vendordir], RbConfig::CONFIG['RUBY_INSTALL_NAME']),
-        :local => previous_but_one_dir_to(ConfigMap[:sitedir], RbConfig::CONFIG['RUBY_INSTALL_NAME'])
+        :system => previous_but_one_dir_to(ConfigMap[:vendordir], ConfigMap[:RUBY_INSTALL_NAME]),
+        :local => previous_but_one_dir_to(ConfigMap[:sitedir], ConfigMap[:RUBY_INSTALL_NAME])
       }
     end
 
