@@ -30,6 +30,7 @@ BuildRequires:  rubygems-devel
 BuildRequires:  rubygem(rake)
 BuildRequires:	rubygem(minitest)
 BuildRequires:	rubygem(bigdecimal)
+Requires:       ruby
 Requires:       ruby(abi) = %{rubyabi}
 Requires:       rubygems
 Provides:       rubygem(json) = %{version}
