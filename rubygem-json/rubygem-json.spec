@@ -4,7 +4,7 @@
 
 Name:           rubygem-%{gem_name}
 Version:        1.6.5
-Release:        4%{?dist}
+Release:        5%{?dist}
 
 Summary:        A JSON implementation in Ruby
 
@@ -55,14 +55,14 @@ Requires:	%{name} = %{version}-%{release}
 This package contains documentation for %{name}.
 
 %if 0%{?with_jruby_ext}
-%package	java
+%package	jruby
 Summary:	JRuby extension for %{name}
 Group:		Development/Languages
 
 Requires:	%{name} = %{version}-%{release}
 Requires:       jruby
 
-%description	java
+%description	jruby
 This package contains JRuby extension for %{name}.
 %endif
 
@@ -112,12 +112,12 @@ cp -a .%{gem_dir}/* %{buildroot}/%{gem_dir}
 
 %if 0%{?with_jruby_ext}
 # the noarch part is common, so just link to it
-rm -fr %{buildroot}%{gem_instdir_java}
-ln -s %{gem_instdir} %{buildroot}%{gem_instdir_java}
+rm -fr %{buildroot}%{gem_instdir_jruby}
+ln -s %{gem_instdir} %{buildroot}%{gem_instdir_jruby}
 # create java extdir and make the gemspec aware of extensions, so that they get loaded
-mkdir -p $RPM_BUILD_ROOT%{gem_extdir_java}/ext/%{gem_name}/ext/%{gem_name}/ext
-cp -a .%{gem_instdir}/lib/json/ext/*.jar $RPM_BUILD_ROOT%{gem_extdir_java}/ext/%{gem_name}/ext/%{gem_name}/ext
-sed -i 's|"lib"]|"ext/json/ext", "ext", "lib"]\ns.extensions = ["doesnt_matter_whats_here"]|' %{buildroot}%{gem_spec_java}
+mkdir -p $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
+cp -a .%{gem_instdir}/lib/json/ext/*.jar $RPM_BUILD_ROOT%{gem_extdir_jruby}/ext/%{gem_name}/ext/%{gem_name}/ext
+sed -i 's|"lib"]|"ext/json/ext", "ext", "lib"]\ns.extensions = ["doesnt_matter_whats_here"]|' %{buildroot}%{gem_spec_jruby}
 %endif
 
 # Let's move arch dependent files to arch specific directory
@@ -175,15 +175,18 @@ popd
 %{gem_docdir}/
 
 %if 0%{?with_jruby_ext}
-%files      java
+%files      jruby
 %defattr(-,root,root,-)
-%exclude %{gem_cache_java}
-%{gem_instdir_java}
-%{gem_spec_java}
-%{gem_extdir_java}
+%exclude %{gem_cache_jruby}
+%{gem_instdir_jruby}
+%{gem_spec_jruby}
+%{gem_extdir_jruby}
 %endif
 
 %changelog
+* Tue Dec 04 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.6.5-5
+- Utilize even newer JRuby macros :)
+
 * Fri Nov 02 2012 Bohuslav Kabrda <bkabrda@redhat.com> - 1.6.5-4
 - Use the -java gem to get separate gemspec for JRuby ext.
 - Utilize new RubyGems JRuby macros.
