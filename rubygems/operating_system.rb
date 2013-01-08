@@ -9,6 +9,7 @@ module Gem
       split_path = path.split(File::SEPARATOR)
       File.join(split_path.take_while { |one_dir| one_dir !~ /^#{dir}$/ }[0..-2])
     end
+    private :previous_but_one_dir_to
 
     ##
     # Default gems locations allowed on FHS system (/usr, /usr/share).
