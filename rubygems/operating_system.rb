@@ -3,7 +3,7 @@ module Gem
 
     ##
     # Returns full path of previous but one directory of dir in path
-    # E.g. for '/usr/share/jruby', 'jruby', it returns '/usr'
+    # E.g. for '/usr/share/ruby', 'ruby', it returns '/usr'
 
     def previous_but_one_dir_to(path, dir)
       split_path = path.split(File::SEPARATOR)
